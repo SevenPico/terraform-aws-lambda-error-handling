@@ -6,7 +6,8 @@ module "lambda_global_error_dlq_context" {
 }
 
 resource "aws_sqs_queue" "lambda_global_error_dlq" {
-  count                      = module.lambda_global_error_dlq_context.enabled ? 1 : 0
+  count = module.lambda_global_error_dlq_context.enabled ? 1 : 0
+
   name                       = module.lambda_global_error_dlq_context.id
   message_retention_seconds  = var.sqs_message_retention_seconds
   visibility_timeout_seconds = var.sqs_visibility_timeout_seconds
@@ -23,7 +24,8 @@ data "aws_iam_policy_document" "sqs_publish_policy_doc" {
 }
 
 resource "aws_iam_policy" "sqs_publish_policy" {
-  count       = module.lambda_global_error_dlq_context.enabled ? 1 : 0
+  count = module.lambda_global_error_dlq_context.enabled ? 1 : 0
+
   name        = "${module.lambda_global_error_dlq_context.id}-sqs-publish-policy"
   description = "SQS publish policy for lambda."
   policy      = data.aws_iam_policy_document.sqs_publish_policy_doc.json

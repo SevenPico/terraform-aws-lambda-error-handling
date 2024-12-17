@@ -2,18 +2,20 @@ module "rate_sns_context" {
   source     = "registry.terraform.io/SevenPico/context/null"
   version    = "2.0.0"
   context    = module.context.self
-  attributes = ["volume", "sns"]
+  enabled    = module.lambda_global_error_dlq_context.enabled && var.rate_sns_topic_arn != ""
+  attributes = ["rate", "sns"]
 }
 
 module "volume_sns_context" {
   source     = "registry.terraform.io/SevenPico/context/null"
   version    = "2.0.0"
   context    = module.context.self
-  attributes = ["rate", "sns"]
+  enabled    = module.lambda_global_error_dlq_context.enabled && var.volume_sns_topic_arn != ""
+  attributes = ["volume", "sns"]
 }
 
 module "rate_alarm_alert_sns" {
-  count   = var.rate_sns_topic_arn == "" ? 1 : 0
+  count   = module.rate_sns_context.enabled ? 1 : 0
   source  = "SevenPico/sns/aws"
   version = "2.0.2"
   context = module.rate_sns_context.self
@@ -24,7 +26,7 @@ module "rate_alarm_alert_sns" {
 }
 
 module "volume_alarm_alert_sns" {
-  count   = var.volume_sns_topic_arn == "" ? 1 : 0
+  count   = module.volume_sns_context.enabled ? 1 : 0
   source  = "SevenPico/sns/aws"
   version = "2.0.2"
   context = module.volume_sns_context.self

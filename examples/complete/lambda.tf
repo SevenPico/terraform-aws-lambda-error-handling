@@ -1,4 +1,6 @@
 resource "archive_file" "hello_world_lambda_zip" {
+  count = module.example_context.enabled ? 1 : 0
+
   type        = "zip"
   source_file = "${path.module}/lambda/index.js"
   output_path = "${path.module}/lambda/.dist/index.zip"
@@ -18,7 +20,7 @@ module "example_lambda" {
   cloudwatch_log_subscription_filters = {}
   description                         = "Example Lambda function"
   event_source_mappings               = {}
-  filename                            = archive_file.hello_world_lambda_zip.output_path
+  filename                            = archive_file.hello_world_lambda_zip[0].output_path
   function_name                       = "example-function"
   handler                             = "index.handler"
   ignore_external_function_updates    = false
@@ -38,7 +40,7 @@ module "example_lambda" {
   s3_key                              = null
   s3_object_version                   = null
   sns_subscriptions                   = {}
-  source_code_hash                    = filebase64sha256(archive_file.hello_world_lambda_zip.output_path)
+  source_code_hash                    = filebase64sha256(archive_file.hello_world_lambda_zip[0].output_path)
   ssm_parameter_names                 = null
   timeout                             = 10
   tracing_config_mode                 = null

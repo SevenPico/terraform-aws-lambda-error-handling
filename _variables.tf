@@ -108,13 +108,11 @@ variable "lambda_role_name" {
 }
 
 variable "rate_sns_topic_arn" {
-  description = "(Optional) ARN of the SNS topic for rate alarm notifications. Defaults to an empty string."
+  description = "ARN of the SNS topic for rate alarm notifications. Defaults to an empty string."
   type        = string
-  default     = ""
 }
 
 variable "volume_sns_topic_arn" {
-  description = "(Optional) ARN of the SNS topic for volume alarm notifications. Defaults to an empty string."
+  description = "ARN of the SNS topic for volume alarm notifications. Defaults to an empty string."
   type        = string
-  default     = ""
 }

@@ -1,11 +1,6 @@
-locals {
-  rate_sns_topic_arn   = var.rate_sns_topic_arn != "" ? var.rate_sns_topic_arn : module.rate_alarm_alert_sns.topic_arn
-  volume_sns_topic_arn = var.volume_sns_topic_arn != "" ? var.volume_sns_topic_arn : module.volume_alarm_alert_sns.topic_arn
-}
-
 resource "aws_cloudwatch_metric_alarm" "rate_alarm" {
   count             = module.async_lambda_global_error_notification_context.enabled ? 1 : 0
-  depends_on        = [local.rate_sns_topic_arn]
+  depends_on        = [var.rate_sns_topic_arn]
   alarm_name        = "${module.lambda_global_error_dlq_context.id}-rate"
   alarm_description = "ALARM when the rate of growth for the ${module.lambda_global_error_dlq_context.id} Dead Letter Queue exceeds the threshold"
 
@@ -34,14 +29,14 @@ resource "aws_cloudwatch_metric_alarm" "rate_alarm" {
   comparison_operator = "GreaterThanThreshold"
   threshold           = 0
   treat_missing_data  = "ignore"
-  alarm_actions       = [local.rate_sns_topic_arn]
-  ok_actions          = [local.rate_sns_topic_arn]
+  alarm_actions       = [var.rate_sns_topic_arn]
+  ok_actions          = [var.rate_sns_topic_arn]
   tags                = module.async_lambda_global_error_notification_context.tags
 }
 
 resource "aws_cloudwatch_metric_alarm" "volume_alarm" {
   count      = module.async_lambda_global_error_notification_context.enabled ? 1 : 0
-  depends_on = [local.volume_sns_topic_arn]
+  depends_on = [var.volume_sns_topic_arn]
 
   alarm_name          = "${module.lambda_global_error_dlq_context.id}-volume"
   alarm_description   = "ALARM when the ${module.lambda_global_error_dlq_context.id} Dead Letter Queue has messages remaining to reprocess"
@@ -57,7 +52,7 @@ resource "aws_cloudwatch_metric_alarm" "volume_alarm" {
   dimensions = {
     QueueName = module.lambda_global_error_dlq_context.id
   }
-  alarm_actions = [local.volume_sns_topic_arn]
-  ok_actions    = [local.volume_sns_topic_arn]
+  alarm_actions = [var.volume_sns_topic_arn]
+  ok_actions    = [var.volume_sns_topic_arn]
   tags          = module.async_lambda_global_error_notification_context.tags
 }

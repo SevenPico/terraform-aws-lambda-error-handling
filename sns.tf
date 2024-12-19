@@ -1,7 +1,7 @@
 module "rate_sns_context" {
   source     = "registry.terraform.io/SevenPico/context/null"
   version    = "2.0.0"
-  context    = module.context.self
+  context    = module.lambda_global_error_dlq_context.self
   enabled    = module.lambda_global_error_dlq_context.enabled && var.rate_sns_topic_arn != ""
   attributes = ["rate", "sns"]
 }
@@ -9,7 +9,7 @@ module "rate_sns_context" {
 module "volume_sns_context" {
   source     = "registry.terraform.io/SevenPico/context/null"
   version    = "2.0.0"
-  context    = module.context.self
+  context    = module.lambda_global_error_dlq_context.self
   enabled    = module.lambda_global_error_dlq_context.enabled && var.volume_sns_topic_arn != ""
   attributes = ["volume", "sns"]
 }

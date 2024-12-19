@@ -15,7 +15,6 @@ module "volume_sns_context" {
 }
 
 module "rate_alarm_alert_sns" {
-  count   = module.rate_sns_context.enabled ? 1 : 0
   source  = "SevenPico/sns/aws"
   version = "2.0.2"
   context = module.rate_sns_context.self
@@ -26,7 +25,6 @@ module "rate_alarm_alert_sns" {
 }
 
 module "volume_alarm_alert_sns" {
-  count   = module.volume_sns_context.enabled ? 1 : 0
   source  = "SevenPico/sns/aws"
   version = "2.0.2"
   context = module.volume_sns_context.self

@@ -1,4 +1,4 @@
-# Terraform AWS Async Lambda Global Error Notification
+# Terraform AWS Async Lambda Error Notification
 
 This project sets up a Lambda function with error notifications using AWS services such as EventBridge, SQS, and SNS. The Lambda function is configured to throw an error based on the input event.
 

@@ -16,6 +16,8 @@ resource "aws_sqs_queue" "lambda_global_error_dlq" {
 }
 
 data "aws_iam_policy_document" "sqs_publish_policy_doc" {
+  count = module.lambda_global_error_dlq_context.enabled ? 1 : 0
+
   statement {
     effect    = "Allow"
     actions   = ["sqs:SendMessage"]
@@ -28,7 +30,7 @@ resource "aws_iam_policy" "sqs_publish_policy" {
 
   name        = "${module.lambda_global_error_dlq_context.id}-sqs-publish-policy"
   description = "SQS publish policy for lambda."
-  policy      = data.aws_iam_policy_document.sqs_publish_policy_doc.json
+  policy      = data.aws_iam_policy_document.sqs_publish_policy_doc[0].json
 }
 
 

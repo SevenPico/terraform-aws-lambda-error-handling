@@ -5,7 +5,7 @@ module "pipe_context" {
 }
 
 locals {
-  pipe_name = var.eventbridge_pipe_name != null ? var.eventbridge_pipe_name : "${module.pipe_context.id}-pipe"
+  pipe_name = var.eventbridge_pipe_name != null ? var.eventbridge_pipe_name : "${module.pipe_context.id}-err-pipe"
 }
 
 resource "aws_pipes_pipe" "pipe" {

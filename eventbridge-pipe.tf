@@ -106,7 +106,7 @@ module "pipe_role" {
   policy_description   = "Policy for EventBridge Pipe Role"
   policy_documents     = try([data.aws_iam_policy_document.pipe_policy_document[0].json], [])
   role_description     = "Role for EventBridge Pipe"
-  use_fullname         = true
+  use_fullname         = false
 }
 
 resource "aws_cloudwatch_log_group" "pipe_log_group" {

@@ -2,14 +2,16 @@ module "pipe_context" {
   source  = "SevenPico/context/null"
   version = "2.0.0"
   context = module.async_lambda_global_error_notification_context.self
+}
 
-  attributes = [var.eventbridge_pipe_name]
+locals {
+  pipe_name = var.eventbridge_pipe_name != null ? var.eventbridge_pipe_name : "${module.pipe_context.id}-pipe"
 }
 
 resource "aws_pipes_pipe" "pipe" {
   count = module.pipe_context.enabled ? 1 : 0
 
-  name          = module.pipe_context.id
+  name          = local.pipe_name
   role_arn      = try(module.pipe_role.arn, "")
   source        = aws_sqs_queue.lambda_global_error_dlq[0].arn
   desired_state = "STOPPED"
@@ -79,7 +81,7 @@ module "pipe_role" {
       test     = "StringEquals"
       variable = "aws:SourceArn"
       values = [
-        "${local.arn_prefix}:pipes:${local.region}:${local.account_id}:pipe/${module.pipe_context.id}"
+        "${local.arn_prefix}:pipes:${local.region}:${local.account_id}:pipe/${local.pipe_name}"
       ]
     },
     {
@@ -109,6 +111,6 @@ module "pipe_role" {
 
 resource "aws_cloudwatch_log_group" "pipe_log_group" {
   count             = module.pipe_context.enabled ? 1 : 0
-  name              = "/aws/events/${module.pipe_context.id}-logs"
+  name              = "/aws/events/${local.pipe_name}-logs"
   retention_in_days = var.cloudwatch_log_retention_days
 }

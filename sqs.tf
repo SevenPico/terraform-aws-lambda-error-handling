@@ -1,14 +1,17 @@
 module "lambda_global_error_dlq_context" {
-  source     = "registry.terraform.io/SevenPico/context/null"
-  version    = "2.0.0"
-  context    = module.async_lambda_global_error_notification_context.self
-  attributes = [var.sqs_queue_name]
+  source  = "registry.terraform.io/SevenPico/context/null"
+  version = "2.0.0"
+  context = module.async_lambda_global_error_notification_context.self
+}
+
+locals {
+  sqs_queue_name = var.sqs_queue_name != null ? var.sqs_queue_name : "${module.lambda_global_error_dlq_context.id}-dlq"
 }
 
 resource "aws_sqs_queue" "lambda_global_error_dlq" {
   count = module.lambda_global_error_dlq_context.enabled ? 1 : 0
 
-  name                       = module.lambda_global_error_dlq_context.id
+  name                       = local.sqs_queue_name
   message_retention_seconds  = var.sqs_message_retention_seconds
   visibility_timeout_seconds = var.sqs_visibility_timeout_seconds
   kms_master_key_id          = var.sqs_kms_key_id
@@ -28,7 +31,7 @@ data "aws_iam_policy_document" "sqs_publish_policy_doc" {
 resource "aws_iam_policy" "sqs_publish_policy" {
   count = module.lambda_global_error_dlq_context.enabled ? 1 : 0
 
-  name        = "${module.lambda_global_error_dlq_context.id}-sqs-publish-policy"
+  name        = "${local.sqs_queue_name}-sqs-publish-policy"
   description = "SQS publish policy for lambda."
   policy      = data.aws_iam_policy_document.sqs_publish_policy_doc[0].json
 }

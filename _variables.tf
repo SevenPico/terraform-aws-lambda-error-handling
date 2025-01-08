@@ -28,8 +28,9 @@ variable "alarms_evaluation_periods" {
 }
 
 variable "eventbridge_pipe_name" {
-  description = "The name of the Pipe. (Context will be added as a prefix)"
+  description = "(Optional) The name of the Pipe. (Context will be added as a prefix)"
   type        = string
+  default     = null
 }
 
 variable "eventbridge_pipe_batch_size" {
@@ -74,8 +75,9 @@ variable "lambda_async_config_maximum_retry_attempts" {
 }
 
 variable "sqs_queue_name" {
-  description = "Name of the SQS Dead Letter Queue. "
+  description = "(Optional) Name of the SQS Dead Letter Queue. "
   type        = string
+  default     = null
 }
 
 variable "sqs_message_retention_seconds" {
@@ -115,4 +117,16 @@ variable "rate_sns_topic_arn" {
 variable "volume_sns_topic_arn" {
   description = "ARN of the SNS topic for volume alarm notifications. Defaults to an empty string."
   type        = string
+}
+
+variable "rate_alarm_name" {
+  description = "(Optional) Name of the rate alarm."
+  type        = string
+  default     = null
+}
+
+variable "volume_alarm_name" {
+  description = "(Optional) Name of the volume alarm."
+  type        = string
+  default     = null
 }

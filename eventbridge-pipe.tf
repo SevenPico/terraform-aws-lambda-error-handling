@@ -70,10 +70,9 @@ data "aws_iam_policy_document" "pipe_policy_document" {
 }
 
 module "pipe_role" {
-  source     = "registry.terraform.io/SevenPicoForks/iam-role/aws"
-  version    = "2.0.0"
-  context    = module.pipe_context.self
-  attributes = ["role"]
+  source  = "registry.terraform.io/SevenPicoForks/iam-role/aws"
+  version = "2.0.0"
+  context = module.pipe_context.self
 
   assume_role_actions = ["sts:AssumeRole"]
   assume_role_conditions = [
@@ -102,6 +101,7 @@ module "pipe_role" {
 
   max_session_duration = 3600
   path                 = "/"
+  name                 = "${local.pipe_name}-role"
   permissions_boundary = ""
   policy_description   = "Policy for EventBridge Pipe Role"
   policy_documents     = try([data.aws_iam_policy_document.pipe_policy_document[0].json], [])

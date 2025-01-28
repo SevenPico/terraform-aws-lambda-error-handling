@@ -7,8 +7,8 @@
 resource "aws_cloudwatch_metric_alarm" "rate_alarm" {
   count             = module.async_lambda_global_error_notification_context.enabled ? 1 : 0
   depends_on        = [var.rate_sns_topic_arn]
-  alarm_name        = var.rate_alarm_name != null ? var.rate_alarm_name : "${module.async_lambda_global_error_notification_context.id}-rate"
-  alarm_description = "ALARM when the rate of growth for the ${aws_sqs_queue.lambda_global_error_dlq[0].name} Dead Letter Queue exceeds the threshold"
+  alarm_name        = var.rate_alarm_name != null ? var.rate_alarm_name : "${module.async_lambda_global_error_notification_context.id}-rate-alarm"
+  alarm_description = "Dead Letter Queue `${aws_sqs_queue.lambda_global_error_dlq[0].name}`'s rate of growth exceeds the threshold"
 
   metric_query {
     id          = "e1"
@@ -51,8 +51,8 @@ resource "aws_cloudwatch_metric_alarm" "volume_alarm" {
   count      = module.async_lambda_global_error_notification_context.enabled ? 1 : 0
   depends_on = [var.volume_sns_topic_arn]
 
-  alarm_name          = var.volume_alarm_name != null ? var.volume_alarm_name : "${module.async_lambda_global_error_notification_context.id}-volume"
-  alarm_description   = "ALARM when the ${aws_sqs_queue.lambda_global_error_dlq[0].name} Dead Letter Queue has messages remaining to reprocess"
+  alarm_name          = var.volume_alarm_name != null ? var.volume_alarm_name : "${module.async_lambda_global_error_notification_context.id}-volume-alarm"
+  alarm_description   = "Dead Letter Queue `${aws_sqs_queue.lambda_global_error_dlq[0].name}` has messages remaining to reprocess"
   metric_name         = "ApproximateNumberOfMessagesVisible"
   namespace           = "AWS/SQS"
   statistic           = "Maximum"
@@ -91,7 +91,7 @@ data "aws_iam_policy_document" "rate_alarm_sns_policy" {
       test     = "ArnLike"
       variable = "aws:SourceArn"
       values = [
-        "arn:${data.aws_partition.current[0].partition}:cloudwatch:${data.aws_region.current[0].name}:${data.aws_caller_identity.current[0].account_id}:alarm:${module.async_lambda_global_error_notification_context.id}-rate"
+        "arn:${data.aws_partition.current[0].partition}:cloudwatch:${data.aws_region.current[0].name}:${data.aws_caller_identity.current[0].account_id}:alarm:${module.async_lambda_global_error_notification_context.id}-rate-alarm"
       ]
     }
   }
@@ -112,7 +112,7 @@ data "aws_iam_policy_document" "volume_alarm_sns_policy" {
       test     = "ArnLike"
       variable = "aws:SourceArn"
       values = [
-        "arn:${data.aws_partition.current[0].partition}:cloudwatch:${data.aws_region.current[0].name}:${data.aws_caller_identity.current[0].account_id}:alarm:${module.async_lambda_global_error_notification_context.id}-volume"
+        "arn:${data.aws_partition.current[0].partition}:cloudwatch:${data.aws_region.current[0].name}:${data.aws_caller_identity.current[0].account_id}:alarm:${module.async_lambda_global_error_notification_context.id}-volume-alarm"
       ]
     }
   }

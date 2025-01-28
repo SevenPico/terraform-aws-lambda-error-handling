@@ -3,10 +3,14 @@ variable "lambda_arn" {
   type        = string
 }
 
-variable "sns_topic_arn" {
-  description = "(Optional) The ARN of the SNS topic for alarm notifications. Defaults to an empty string."
+variable "rate_sns_topic_arn" {
+  description = "ARN of the SNS topic for rate alarm notifications."
   type        = string
-  default     = ""
+}
+
+variable "volume_sns_topic_arn" {
+  description = "ARN of the SNS topic for volume alarm notifications."
+  type        = string
 }
 
 variable "alarms_period" {
@@ -106,16 +110,6 @@ variable "sns_kms_key_id" {
 
 variable "lambda_role_name" {
   description = "Iam Role arn of the lambda."
-  type        = string
-}
-
-variable "rate_sns_topic_arn" {
-  description = "ARN of the SNS topic for rate alarm notifications. Defaults to an empty string."
-  type        = string
-}
-
-variable "volume_sns_topic_arn" {
-  description = "ARN of the SNS topic for volume alarm notifications. Defaults to an empty string."
   type        = string
 }
 

@@ -58,9 +58,9 @@ remote_state {
   backend = "s3"
   disable_init = false
   config  = {
-    bucket                = "brim-sandbox-tfstate"
+    bucket                = get_env("TFSTATE_BUCKET")
     disable_bucket_update = true
-    dynamodb_table        = "brim-sandbox-tfstate-lock"
+    dynamodb_table        = get_env("TFSTATE_LOCK_TABLE")
     encrypt               = true
     key                   = "${local.account_id}/${local.project}/${local.stage}/terraform.tfstate"
     region                = local.region

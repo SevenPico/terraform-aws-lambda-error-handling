@@ -1,5 +1,6 @@
 exports.handler = async (event) => {
-  if (event.toError) {
+  console.debug("input: ", JSON.stringify(event));
+  if (event.fail === true) {
     throw new Error("Forced error");
   }
   return {

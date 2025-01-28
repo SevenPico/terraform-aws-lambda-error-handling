@@ -1,15 +1,17 @@
 locals {
   account_id  = get_aws_account_id()
-  tenant      = "Brim"
+  tenant      = get_env("TENANT")
 
-  region = get_env("AWS_REGION")
-  root_domain = "modules.thebrim.io"
+  region      = get_env("AWS_REGION")
+  root_domain = get_env("ROOT_DOMAIN")
 
-  namespace   = "brim"
-  project     = "async-lambda-error-notification"
-  environment = ""
+  namespace   = get_env("NAMESPACE")
+  project     = "async-lambda-err"
+  environment = get_env("ENVIRONMENT") // "eg"
   stage       = basename(get_terragrunt_dir()) //
   domain_name = "${local.stage}.${local.project}.${local.root_domain}"
+
+  enabled = get_env("ENABLED")
 
   tags = { Source = "Managed by Terraform" }
   regex_replace_chars = "/[^-a-zA-Z0-9]/"
@@ -27,6 +29,7 @@ inputs = {
   root_domain = local.root_domain
 
   # Standard Context
+  enabled             = local.enabled
   region              = local.region
   tenant              = local.tenant
   project             = local.project
@@ -56,9 +59,9 @@ remote_state {
   backend = "s3"
   disable_init = false
   config  = {
-    bucket                = "brim-sandbox-tfstate"
+    bucket                = get_env("TFSTATE_BUCKET")
     disable_bucket_update = true
-    dynamodb_table        = "brim-sandbox-tfstate-lock"
+    dynamodb_table        = get_env("TFSTATE_LOCK_TABLE")
     encrypt               = true
     key                   = "${local.account_id}/${local.project}/${local.stage}/terraform.tfstate"
     region                = local.region

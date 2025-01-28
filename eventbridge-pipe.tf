@@ -67,6 +67,19 @@ data "aws_iam_policy_document" "pipe_policy_document" {
     ]
     resources = [aws_cloudwatch_log_group.pipe_log_group[0].arn]
   }
+
+  dynamic "statement" {
+    for_each = var.sqs_kms_key_config != null ? [1] : []
+    content {
+      sid    = "KMSDecrypt"
+      effect = "Allow"
+      actions = [
+        "kms:Decrypt",
+        "kms:GenerateDataKey"
+      ]
+      resources = [var.sqs_kms_key_config.key_arn]
+    }
+  }
 }
 
 module "pipe_role" {

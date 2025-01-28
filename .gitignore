@@ -31,3 +31,13 @@ override.tf.json
 .idea/
 .dist
 node_modules/
+
+.env
+
+generated-backend.tf
+generated-providers.tf
+
+# Ignore generated Lambda zip files
+**/lambda/**/*.zip
+
+**/*.log

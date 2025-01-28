@@ -1,36 +1,63 @@
 # Terraform AWS Async Lambda Error Notification
 
-This project sets up a Lambda function with error notifications using AWS services such as EventBridge, SQS, and SNS. The Lambda function is configured to throw an error based on the input event.
+This project adds to a given Lambda function notification of async execution error / dead letter queue events.
 
 ## Architecture Diagram
 
 ```mermaid
-graph TD;
+flowchart TD
+    TRG[Async Trigger] -->|Async Invokes|λ[Lambda Function]
+    λ -->|Fails after Retries| DLQ[Dead Letter Queue<br/>SQS]
+    DLQ -->|Rate Alarm| CWR[CloudWatch Alarm<br/>Rate-based]
+    DLQ -->|Volume Alarm| CWV[CloudWatch Alarm<br/>Volume-based]
+    CWR -->|Notifications| SNS1[Rate Alert<br/>SNS Topic]
+    CWV -->|Notifications| SNS2[Volume Alert<br/>SNS Topic]
 
+    DLQ -->|optionally <br/> consumed by| EBP[EventBridge Pipe]
+    EBP[EventBridge Pipe <br/> Reprocess Lambda] -->|Reprocesses<br/> Async Invocation| λ
 ```
-
-## Modules
-
-- **example_context**: Provides context for the resources.
-- **async_lambda_error_notifications**: Sets up the error notification pipeline.
-- **example_lambda**: Deploys the Lambda function.
-- **example_lambda_role**: Creates the IAM role for the Lambda function.
 
 ## Resources
 
-- **Lambda Function**: A simple "Hello World" function that throws an error if `toError` is true in the request event.
-- **EventBridge Pipe**: Routes events from the Lambda function to the SQS queue.
+- **Lambda Function**: Any already existing Lambda function you want to monitor for **async** execution errors.
 - **SQS Queue**: Acts as a dead-letter queue for the Lambda function and reprocesses the messages.
-- **SNS Topic**: Sends notifications when errors occur.
+- **CloudWatch Alarms**: Alarms when the dead letter queue is growing (Rate-based) or the queue is non-zero (Volume-based).
+- **SNS Topics**: Sends notifications when errors occur.
+- **EventBridge Pipe**: When MANUALLY turned on, reprocesses events from the dead letter queue to the Lambda function. Defaults to off.
 
 ## Variables
 
-- `lambda_arn`: The ARN of the Lambda to monitor.
-- `sns_topic_arn`: The ARN of the SNS topic for alarm notifications.
-- `eventbridge_pipe_name`: The name of the EventBridge Pipe.
-- `sqs_queue_name`: The name of the SQS Dead Letter Queue.
-- `lambda_role_name`: The IAM role name for the Lambda function.
-- `lambda_function_name`: The name of the Lambda function.
+### Required Variables
+
+| Name                   | Description                                         |
+| ---------------------- | --------------------------------------------------- |
+| `lambda_arn`           | The ARN of the Lambda to monitor                    |
+| `rate_sns_topic_arn`   | ARN of the SNS topic for rate alarm notifications   |
+| `volume_sns_topic_arn` | ARN of the SNS topic for volume alarm notifications |
+| `lambda_function_name` | The name of the Lambda function                     |
+| `lambda_role_name`     | IAM role name for the Lambda function               |
+
+### Optional Variables
+
+| Name                                               | Description                                                    | Default                |
+| -------------------------------------------------- | -------------------------------------------------------------- | ---------------------- |
+| `alarms_period`                                    | Period in seconds for CloudWatch alarms                        | `60`                   |
+| `alarms_datapoints_to_alarm`                       | Number of data points that must breach to trigger the alarm    | `2`                    |
+| `alarms_evaluation_periods`                        | Number of periods over which data is compared                  | `2`                    |
+| `eventbridge_pipe_name`                            | Name of the EventBridge Pipe (context will be added as prefix) | `null`                 |
+| `eventbridge_pipe_batch_size`                      | Batch size for EventBridge Pipe processing                     | `1`                    |
+| `eventbridge_pipe_log_level`                       | Logging level for EventBridge Pipe                             | `"ERROR"`              |
+| `cloudwatch_log_retention_days`                    | Days to retain CloudWatch logs                                 | `90`                   |
+| `target_lambda_input_template`                     | Event transformation template                                  | `"<$.requestPayload>"` |
+| `lambda_async_config_maximum_event_age_in_seconds` | Maximum age of Lambda request in seconds                       | `3600`                 |
+| `lambda_async_config_maximum_retry_attempts`       | Maximum retry attempts for Lambda errors                       | `2`                    |
+| `sqs_queue_name`                                   | Name of the SQS Dead Letter Queue                              | `null`                 |
+| `sqs_message_retention_seconds`                    | SQS message retention period in seconds                        | `604800`               |
+| `sqs_visibility_timeout_seconds`                   | SQS visibility timeout in seconds                              | `2`                    |
+| `sqs_kms_key_id`                                   | KMS key for SQS encryption at rest                             | `null`                 |
+| `sns_kms_key_id`                                   | KMS key for SNS encryption at rest                             | `null`                 |
+| `rate_alarm_name`                                  | Name of the rate alarm                                         | `null`                 |
+| `volume_alarm_name`                                | Name of the volume alarm                                       | `null`                 |
 
 ## Usage
 
@@ -69,6 +96,35 @@ exports.handler = async (event) => {
   };
 };
 ```
+
+## Testing Async Invocation of the Lambda Function
+
+```bash
+aws lambda invoke \
+  --function-name YourFunctionName \
+  --invocation-type Event \
+  --cli-binary-format raw-in-base64-out \
+  --payload '{"fail":true}' \
+  response.json
+```
+
+When testing, keep in mind that the Lambda function will retry twice with backoff before sending to the DLQ. This usually takes about 3 minutes. Also, the SQS queue metric `Approximate Number Of Messages Visible` is the basis for the Alarms, and I find it may take another 2-3 minutes after the SQS enqueues a message before the metric fully aggregates and the alarm is triggered.
+
+For ease of testing, you may wish to set the Lambda's async retry attempts to 0.
+
+# Roadmap
+
+## v0.1.0
+
+- [x] Supports KMS encryption in SQS Dead Letter Queues and SNS notification Topics
+- [x] Alarm and Notify when dead letter queue volume is above zero
+- [x] Alarm and Notify when dead letter queue rate is recently above zero
+- [x] Pipe to reprocess messages from DLQ to Lambda
+
+## later
+
+- [ ] Earlier Alarm: Use Number of Messages Sent metric for the rate alarm, which will result in a much earlier initial alarm than Approximate Number Of Messages Visible
+- [ ] Alarm Trigger LOG_LEVEL escalation and de-escalation
 
 ## License
 

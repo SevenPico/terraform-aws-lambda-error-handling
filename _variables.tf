@@ -3,10 +3,14 @@ variable "lambda_arn" {
   type        = string
 }
 
-variable "sns_topic_arn" {
-  description = "(Optional) The ARN of the SNS topic for alarm notifications. Defaults to an empty string."
+variable "rate_sns_topic_arn" {
+  description = "ARN of the SNS topic for rate alarm notifications."
   type        = string
-  default     = ""
+}
+
+variable "volume_sns_topic_arn" {
+  description = "ARN of the SNS topic for volume alarm notifications."
+  type        = string
 }
 
 variable "alarms_period" {
@@ -16,15 +20,15 @@ variable "alarms_period" {
 }
 
 variable "alarms_datapoints_to_alarm" {
-  description = "(Optional) Number of data points that must breach to trigger the alarm. Defaults to 2."
+  description = "(Optional) Number of data points that must breach to trigger the alarm. Defaults to 1 so ALARM notifies ASAP."
   type        = number
-  default     = 2
+  default     = 1
 }
 
 variable "alarms_evaluation_periods" {
-  description = "(Optional) Number of periods over which data is compared to the specified threshold. Defaults to 2."
+  description = "(Optional) Number of periods over which data is compared to the specified threshold. Defaults to 5 so OK notifies only after an incident settles."
   type        = number
-  default     = 2
+  default     = 5
 }
 
 variable "eventbridge_pipe_name" {
@@ -92,10 +96,13 @@ variable "sqs_visibility_timeout_seconds" {
   default     = 2
 }
 
-variable "sqs_kms_key_id" {
-  description = "(Optional) Managed key for encryption at rest. Defaults to null."
-  type        = string
-  default     = null
+variable "sqs_kms_key_config" {
+  description = "(Optional) When present, all generated SQS queues will be encrypted with the provided KMS key. If not provided, default AWS managed keys will be used."
+  type = object({
+    key_id  = string
+    key_arn = string
+  })
+  default = null
 }
 
 variable "sns_kms_key_id" {
@@ -106,16 +113,6 @@ variable "sns_kms_key_id" {
 
 variable "lambda_role_name" {
   description = "Iam Role arn of the lambda."
-  type        = string
-}
-
-variable "rate_sns_topic_arn" {
-  description = "ARN of the SNS topic for rate alarm notifications. Defaults to an empty string."
-  type        = string
-}
-
-variable "volume_sns_topic_arn" {
-  description = "ARN of the SNS topic for volume alarm notifications. Defaults to an empty string."
   type        = string
 }
 

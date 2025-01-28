@@ -3,23 +3,24 @@ module "example_context" {
   version    = "2.0.0"
   context    = module.context.self
   attributes = []
+  enabled    = module.context.enabled
 }
 
 module "async_lambda_error_notifications" {
   source     = "../../"
   attributes = []
-
   context    = module.example_context.self
-  lambda_arn = module.example_lambda[0].arn
 
-  lambda_role_name     = module.example_lambda[0].role_name
-  lambda_function_name = module.example_lambda[0].function_name
+  lambda_arn           = try(module.example_lambda[0].arn, "")
+  lambda_role_name     = try(module.example_lambda[0].role_name, "")
+  lambda_function_name = try(module.example_lambda[0].function_name, "")
   rate_sns_topic_arn   = try(module.rate_alarm_alert_sns[0].topic_arn, "")
   volume_sns_topic_arn = try(module.volume_alarm_alert_sns[0].topic_arn, "")
-  sqs_kms_key_config = {
+
+  sqs_kms_key_config = module.context.enabled ? {
     key_id  = aws_kms_key.sqs_kms_key[0].id
     key_arn = aws_kms_key.sqs_kms_key[0].arn
-  }
+  } : null
 }
 
 

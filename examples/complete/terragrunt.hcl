@@ -29,6 +29,7 @@ inputs = {
   root_domain = local.root_domain
 
   # Standard Context
+  enabled             = local.enabled
   region              = local.region
   tenant              = local.tenant
   project             = local.project

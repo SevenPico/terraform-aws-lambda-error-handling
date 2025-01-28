@@ -1,3 +1,18 @@
+# Example: Complete
+
+This example shows how to add async error notifications to a given Lambda function. It uses SQS queues and SNS topics which are KMS encrypted.
+
+It deploys the following resources:
+
+- **Lambda Function Event Invoke Config**: Configures async error handling and DLQ destination
+- **SQS Dead Letter Queue**: Captures failed async Lambda executions
+- **Two CloudWatch Alarms**:
+  - Rate-based alarm for monitoring DLQ growth rate
+  - Volume-based alarm for monitoring DLQ message count
+- **EventBridge Pipe**: (Disabled by default) For reprocessing failed events
+- **IAM Role and Policies**: For EventBridge Pipe and SQS permissions
+- **CloudWatch Log Group**: For EventBridge Pipe logs
+
 ## Prerequisites
 
 - [terragrunt](https://terragrunt.gruntwork.io/docs/getting-started/install/)

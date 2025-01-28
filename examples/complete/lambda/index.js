@@ -1,5 +1,5 @@
 exports.handler = async (event) => {
-  if (event.toError) {
+  if (event.fail === true) {
     throw new Error("Forced error");
   }
   return {

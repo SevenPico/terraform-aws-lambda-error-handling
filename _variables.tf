@@ -20,15 +20,15 @@ variable "alarms_period" {
 }
 
 variable "alarms_datapoints_to_alarm" {
-  description = "(Optional) Number of data points that must breach to trigger the alarm. Defaults to 2."
+  description = "(Optional) Number of data points that must breach to trigger the alarm. Defaults to 1 so ALARM notifies ASAP."
   type        = number
-  default     = 2
+  default     = 1
 }
 
 variable "alarms_evaluation_periods" {
-  description = "(Optional) Number of periods over which data is compared to the specified threshold. Defaults to 2."
+  description = "(Optional) Number of periods over which data is compared to the specified threshold. Defaults to 5 so OK notifies only after an incident settles."
   type        = number
-  default     = 2
+  default     = 5
 }
 
 variable "eventbridge_pipe_name" {

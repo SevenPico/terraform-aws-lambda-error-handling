@@ -18,10 +18,13 @@ resource "aws_kms_key" "sqs_kms_key" {
         Resource = ["arn:aws:kms:${local.region}:${local.account_id}:key/*"]
       }],
       module.context.enabled ? [{
-        Sid    = "Allow Lambda to use the key"
+        Sid    = "Allow Lambda and Lambda Async to use the key"
         Effect = "Allow"
         Principal = {
-          Service = "lambda.amazonaws.com"
+          Service = [
+            "lambda.amazonaws.com",
+            "events.amazonaws.com" # This is needed for async Lambda failures
+          ]
         }
         Action = [
           "kms:Decrypt",
@@ -33,10 +36,14 @@ resource "aws_kms_key" "sqs_kms_key" {
             "aws:SourceAccount" = local.account_id
           }
           ArnLike = {
-            "aws:SourceArn" = "arn:aws:lambda:${local.region}:${local.account_id}:function:*"
+            "aws:SourceArn" = [
+              "arn:aws:lambda:${local.region}:${local.account_id}:function:*",
+              "arn:aws:events:${local.region}:${local.account_id}:*"
+            ]
           }
         }
-        }, {
+      }] : [],
+      module.context.enabled ? [{
         Sid    = "Allow EventBridge Pipe to use the key"
         Effect = "Allow"
         Principal = {

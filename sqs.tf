@@ -14,7 +14,7 @@ resource "aws_sqs_queue" "lambda_global_error_dlq" {
   name                       = local.sqs_queue_name
   message_retention_seconds  = var.sqs_message_retention_seconds
   visibility_timeout_seconds = var.sqs_visibility_timeout_seconds
-  kms_master_key_id          = var.sqs_kms_key_id
+  kms_master_key_id          = try(var.sqs_kms_key_config.key_id, null)
   tags                       = module.context.tags
 }
 
@@ -25,6 +25,18 @@ data "aws_iam_policy_document" "sqs_publish_policy_doc" {
     effect    = "Allow"
     actions   = ["sqs:SendMessage"]
     resources = [aws_sqs_queue.lambda_global_error_dlq[0].arn]
+  }
+
+  dynamic "statement" {
+    for_each = var.sqs_kms_key_config != null ? [1] : []
+    content {
+      effect = "Allow"
+      actions = [
+        "kms:GenerateDataKey",
+        "kms:Decrypt"
+      ]
+      resources = [var.sqs_kms_key_config.key_arn]
+    }
   }
 }
 

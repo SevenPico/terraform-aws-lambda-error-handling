@@ -96,10 +96,13 @@ variable "sqs_visibility_timeout_seconds" {
   default     = 2
 }
 
-variable "sqs_kms_key_id" {
-  description = "(Optional) Managed key for encryption at rest. Defaults to null."
-  type        = string
-  default     = null
+variable "sqs_kms_key_config" {
+  description = "(Optional) When present, all generated SQS queues will be encrypted with the provided KMS key. If not provided, default AWS managed keys will be used."
+  type = object({
+    key_id  = string
+    key_arn = string
+  })
+  default = null
 }
 
 variable "sns_kms_key_id" {

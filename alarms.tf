@@ -14,6 +14,7 @@ resource "aws_cloudwatch_metric_alarm" "rate_alarm" {
     id          = "e1"
     expression  = "RATE(m1)"
     return_data = true
+    label       = "Rate of Change of ApproximateNumberOfMessagesVisible"
   }
 
   metric_query {
@@ -91,7 +92,7 @@ data "aws_iam_policy_document" "rate_alarm_sns_policy" {
       test     = "ArnLike"
       variable = "aws:SourceArn"
       values = [
-        "arn:${data.aws_partition.current[0].partition}:cloudwatch:${data.aws_region.current[0].name}:${data.aws_caller_identity.current[0].account_id}:alarm:${module.async_lambda_global_error_notification_context.id}-rate-alarm"
+        "arn:${data.aws_partition.current[0].partition}:cloudwatch:${data.aws_region.current[0].name}:${data.aws_caller_identity.current[0].account_id}:alarm:${aws_cloudwatch_metric_alarm.rate_alarm[0].alarm_name}"
       ]
     }
   }
@@ -112,7 +113,7 @@ data "aws_iam_policy_document" "volume_alarm_sns_policy" {
       test     = "ArnLike"
       variable = "aws:SourceArn"
       values = [
-        "arn:${data.aws_partition.current[0].partition}:cloudwatch:${data.aws_region.current[0].name}:${data.aws_caller_identity.current[0].account_id}:alarm:${module.async_lambda_global_error_notification_context.id}-volume-alarm"
+        "arn:${data.aws_partition.current[0].partition}:cloudwatch:${data.aws_region.current[0].name}:${data.aws_caller_identity.current[0].account_id}:alarm:${aws_cloudwatch_metric_alarm.volume_alarm[0].alarm_name}"
       ]
     }
   }

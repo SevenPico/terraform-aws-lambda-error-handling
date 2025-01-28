@@ -110,6 +110,8 @@ aws lambda invoke \
 
 When testing, keep in mind that the Lambda function will retry twice with backoff before sending to the DLQ. This usually takes about 3 minutes. Also, the SQS queue metric `Approximate Number Of Messages Visible` is the basis for the Alarms, and I find it may take another 2-3 minutes after the SQS enqueues a message before the metric fully aggregates and the alarm is triggered.
 
+For ease of testing, you may wish to set the Lambda's async retry attempts to 0.
+
 ## License
 
 This project is licensed under the MIT License.

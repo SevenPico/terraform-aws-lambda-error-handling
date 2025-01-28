@@ -10,10 +10,10 @@ module "async_lambda_error_notifications" {
   attributes = ["example"]
 
   context    = module.example_context.self
-  lambda_arn = module.example_lambda.arn
+  lambda_arn = module.example_lambda[0].arn
 
-  lambda_role_name     = module.example_lambda_role.name
-  lambda_function_name = module.example_lambda.function_name
+  lambda_role_name     = module.example_lambda[0].role_name
+  lambda_function_name = module.example_lambda[0].function_name
   rate_sns_topic_arn   = ""
   volume_sns_topic_arn = ""
 }

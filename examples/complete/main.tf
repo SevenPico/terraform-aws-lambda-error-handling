@@ -35,7 +35,17 @@ module "rate_alarm_alert_sns" {
   context    = module.example_context.self
   attributes = ["rate", "sns"]
 
-  pub_principals = {}
+  pub_principals = {
+    "AllowCloudWatchAlarmPublishRateAlarm" = {
+      type        = "Service"
+      identifiers = ["cloudwatch.amazonaws.com"]
+      condition = {
+        test     = "ArnLike"
+        variable = "aws:SourceArn"
+        values   = ["arn:aws:cloudwatch:${local.region}:${local.account_id}:alarm:${module.example_context.id}-rate-alarm"]
+      }
+    }
+  }
   sub_principals = {}
   tags           = module.example_context.tags
 
@@ -43,12 +53,23 @@ module "rate_alarm_alert_sns" {
 }
 
 module "volume_alarm_alert_sns" {
-  count          = module.context.enabled ? 1 : 0
-  source         = "SevenPico/sns/aws"
-  version        = "2.0.2"
-  context        = module.example_context.self
-  attributes     = ["volume", "sns"]
-  pub_principals = {}
+  count      = module.context.enabled ? 1 : 0
+  source     = "SevenPico/sns/aws"
+  version    = "2.0.2"
+  context    = module.example_context.self
+  attributes = ["volume", "sns"]
+
+  pub_principals = {
+    "AllowCloudWatchAlarmPublishVolumeAlarm" = {
+      type        = "Service"
+      identifiers = ["cloudwatch.amazonaws.com"]
+      condition = {
+        test     = "ArnLike"
+        variable = "aws:SourceArn"
+        values   = ["arn:aws:cloudwatch:${local.region}:${local.account_id}:alarm:${module.example_context.id}-volume-alarm"]
+      }
+    }
+  }
   sub_principals = {}
   tags           = module.example_context.tags
 

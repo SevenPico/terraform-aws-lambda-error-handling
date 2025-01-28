@@ -112,6 +112,20 @@ When testing, keep in mind that the Lambda function will retry twice with backof
 
 For ease of testing, you may wish to set the Lambda's async retry attempts to 0.
 
+# Roadmap
+
+## v0.1.0
+
+- [x] Supports KMS encryption in SQS Dead Letter Queues and SNS notification Topics
+- [x] Alarm and Notify when dead letter queue volume is above zero
+- [x] Alarm and Notify when dead letter queue rate is recently above zero
+- [x] Pipe to reprocess messages from DLQ to Lambda
+
+## later
+
+- [ ] Earlier Alarm: Use Number of Messages Sent metric for the rate alarm, which will result in a much earlier initial alarm than Approximate Number Of Messages Visible
+- [ ] Alarm Trigger LOG_LEVEL escalation and de-escalation
+
 ## License
 
 This project is licensed under the MIT License.

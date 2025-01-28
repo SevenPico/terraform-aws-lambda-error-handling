@@ -8,7 +8,7 @@ resource "aws_cloudwatch_metric_alarm" "rate_alarm" {
   count             = module.async_lambda_global_error_notification_context.enabled ? 1 : 0
   depends_on        = [var.rate_sns_topic_arn]
   alarm_name        = var.rate_alarm_name != null ? var.rate_alarm_name : "${module.async_lambda_global_error_notification_context.id}-rate"
-  alarm_description = "ALARM when the rate of growth for the ${module.lambda_global_error_dlq_context.id} Dead Letter Queue exceeds the threshold"
+  alarm_description = "ALARM when the rate of growth for the ${aws_sqs_queue.lambda_global_error_dlq[0].name} Dead Letter Queue exceeds the threshold"
 
   metric_query {
     id          = "e1"
@@ -24,7 +24,7 @@ resource "aws_cloudwatch_metric_alarm" "rate_alarm" {
       period      = var.alarms_period
       stat        = "Maximum"
       dimensions = {
-        QueueName = module.lambda_global_error_dlq_context.id
+        QueueName = aws_sqs_queue.lambda_global_error_dlq[0].name
       }
     }
     return_data = false
@@ -52,7 +52,7 @@ resource "aws_cloudwatch_metric_alarm" "volume_alarm" {
   depends_on = [var.volume_sns_topic_arn]
 
   alarm_name          = var.volume_alarm_name != null ? var.volume_alarm_name : "${module.async_lambda_global_error_notification_context.id}-volume"
-  alarm_description   = "ALARM when the ${module.lambda_global_error_dlq_context.id} Dead Letter Queue has messages remaining to reprocess"
+  alarm_description   = "ALARM when the ${aws_sqs_queue.lambda_global_error_dlq[0].name} Dead Letter Queue has messages remaining to reprocess"
   metric_name         = "ApproximateNumberOfMessagesVisible"
   namespace           = "AWS/SQS"
   statistic           = "Maximum"
@@ -63,7 +63,7 @@ resource "aws_cloudwatch_metric_alarm" "volume_alarm" {
   threshold           = 0
   treat_missing_data  = "ignore"
   dimensions = {
-    QueueName = module.lambda_global_error_dlq_context.id
+    QueueName = aws_sqs_queue.lambda_global_error_dlq[0].name
   }
   alarm_actions = [var.volume_sns_topic_arn]
   ok_actions    = [var.volume_sns_topic_arn]

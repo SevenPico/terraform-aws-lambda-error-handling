@@ -15,7 +15,7 @@ resource "aws_sqs_queue" "lambda_global_error_dlq" {
   message_retention_seconds  = var.sqs_message_retention_seconds
   visibility_timeout_seconds = var.sqs_visibility_timeout_seconds
   kms_master_key_id          = try(var.sqs_kms_key_config.key_id, null)
-  tags                       = module.context.tags
+  tags                       = module.async_lambda_global_error_notification_context.tags
 }
 
 data "aws_iam_policy_document" "sqs_publish_policy_doc" {
@@ -46,8 +46,8 @@ resource "aws_iam_policy" "sqs_publish_policy" {
   name        = "${local.sqs_queue_name}-sqs-publish-policy"
   description = "SQS publish policy for lambda."
   policy      = data.aws_iam_policy_document.sqs_publish_policy_doc[0].json
+  tags        = module.async_lambda_global_error_notification_context.tags
 }
-
 
 resource "aws_iam_role_policy_attachment" "attach_sqs_publish_policy" {
   count      = module.lambda_global_error_dlq_context.enabled ? 1 : 0
